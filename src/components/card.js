@@ -1,6 +1,5 @@
 // функции создания, удаления, лайка карточки
 export function creatCard(data, deleteCard, likeCard, openPopupCardImg) {
-  const placesList = document.querySelector(".places__list");
   const cardTemplate = document.querySelector("#card-template").content;
   const cardTemplateItem = cardTemplate.querySelector(".places__item");
   const cardTemplateItemCopy = cardTemplateItem.cloneNode(true);
@@ -16,7 +15,7 @@ export function creatCard(data, deleteCard, likeCard, openPopupCardImg) {
   cardTitle.textContent = data.name;
   cardDeleteButton.addEventListener("click", deleteCard);
   cardLikeButton.addEventListener("click", likeCard);
-  placesList.addEventListener("click", openPopupCardImg);
+  cardImage.addEventListener("click", openPopupCardImg);
   return cardTemplateItemCopy;
 }
 
