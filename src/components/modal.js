@@ -1,12 +1,12 @@
 // функции popup: карточки, добавления карточки, редактирования профиля, закрыть popup
 export function openPopup(element) {
   element.classList.add("popup_is-opened");
-  document.addEventListener("keydown", (evt) => clickEscape(evt, element));
+  document.addEventListener("keydown", clickEscape);
 }
 
 export function closePopup(element) {
   element.classList.remove("popup_is-opened");
-  document.removeEventListener("keydown", (evt) => clickEscape(evt, element));
+  document.removeEventListener("keydown", clickEscape);
 }
 
 export function clickOverlay(evt) {
@@ -15,8 +15,9 @@ export function clickOverlay(evt) {
   }
 }
 
-function clickEscape(evt, element) {
+function clickEscape(evt) {
   if (evt.key === "Escape") {
-    closePopup(element);
+    const popupIsOpened = document.querySelector(".popup_is-opened");
+    closePopup(popupIsOpened);
   }
 }

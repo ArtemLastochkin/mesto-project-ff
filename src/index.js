@@ -18,6 +18,7 @@ const formTypeEditProfile = document.forms["edit-profile"];
 const formTypeNewCard = document.forms["new-place"];
 
 const inputNamePopupTypeEdit = document.forms["edit-profile"].elements.name;
+
 const inputDescriptionPopupTypeEdit =
   document.forms["edit-profile"].elements.description;
 const inputPlaceNameTypeNewCard =
@@ -44,7 +45,7 @@ function editProfileFormSubmit(evt) {
   evt.preventDefault();
   profileTitle.textContent = inputNamePopupTypeEdit.value;
   profileDescription.textContent = inputDescriptionPopupTypeEdit.value;
-  closePopup(evt.target.closest(".popup"));
+  closePopup(popupTypeEdit);
 }
 
 // обработка submit для создания карточки
@@ -57,7 +58,7 @@ function addNewCardFormSubmit(evt) {
   placesList.prepend(creatCard(newObj, deleteCard, likeCard, openPopupCardImg));
   inputPlaceNameTypeNewCard.value = "";
   inputlinkTypeNewCard.value = "";
-  closePopup(evt.target.closest(".popup"));
+  closePopup(popupTypeNewCard);
 }
 
 // клик по кнопке редактировать профиль
