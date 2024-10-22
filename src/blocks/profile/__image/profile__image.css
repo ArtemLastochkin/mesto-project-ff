@@ -7,6 +7,16 @@
   background-size: cover;
   background-position: center;
   margin: 0 29px 0 0;
+  position: relative;
+}
+
+.profile__image:hover::after {
+  content: '';
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  cursor: pointer;
+  background: no-repeat center 50% / 26px url(../../../images/edit-icon.svg), rgba(0, 0%, 0%, 0.8);
 }
 
 @media screen and (max-width: 740px) {

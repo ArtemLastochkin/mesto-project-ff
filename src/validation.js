@@ -81,10 +81,10 @@ function activeBtnSubmit(elm) {
 
 // Очистка валидации при открытии модал
 export function clearValidation(form, obj) {
- Array.from(form.querySelectorAll(`${obj.keyPopapInput}`)).forEach((i) => {
-  const spanError = form.querySelector(`#${i.id + obj.keyIdSpanError}`)
-  i.removeAttribute('style')
-  spanError.textContent = ''
- });  
+  Array.from(form.querySelectorAll(`${obj.keyPopapInput}`)).forEach((i) => {
+    const spanError = form.querySelector(`#${i.id + obj.keyIdSpanError}`);
+    i.removeAttribute("style");
+    spanError.textContent = "";
+  });
   inactiveBtnSubmit(form.querySelector(`${obj.keyDeleteBtn}`));
 }
