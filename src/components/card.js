@@ -3,7 +3,10 @@ export function creatCard(
   data,
   openPopupCardImg,
   objSettingForDeleteCard,
-  objSettingForLikeCard
+  objSettingForLikeCard,
+  myId,
+  openDeleteCardOk,
+  checkMyLikeInCard
 ) {
   const cardTemplate = document.querySelector("#card-template").content;
   const cardTemplateItem = cardTemplate.querySelector(".places__item");
@@ -15,55 +18,35 @@ export function creatCard(
   );
   const cardLikeButton =
     cardTemplateItemCopy.querySelector(".card__like-button");
-  cardTemplateItemCopy.setAttribute("id", `${data["_id"]}`);
+  const likeCounter = cardTemplateItemCopy.querySelector(
+    ".card__like-button__counter"
+  );
 
   // проверка на собственной карточки
-  if (data["owner"]["_id"] !== "9d69c59e21fa2ffa88579137") {
+  if (data["owner"]["_id"] !== myId) {
     cardDeleteButton.setAttribute("disabled", ""); // выключаем кнопки удаления если не наша карточка
-    cardDeleteButton.setAttribute("style", "display: none"); // выключаем кнопки удаления если не наша карточка
+    cardDeleteButton.classList.remove("card__delete-button_is-active"); // отобразили кнопку удаления
   } else {
+    cardDeleteButton.classList.add("card__delete-button_is-active"); // скрыли кнопку удаления
     // если карточка моя вещаем на кнопку удаления слушатель клика
     cardDeleteButton.addEventListener("click", (evt) => {
-      objSettingForDeleteCard.openDeleteCardOk(
-        document.querySelector(
-          `${objSettingForDeleteCard.keyPopupTypeDeleteCard}`
-        )
-      ); // - функция которая открывает модалку при клике на кнопку удаления
+      openDeleteCardOk(); // - функция которая открывает модалку при клике на кнопку удаления
       objSettingForDeleteCard.idCard = `${data["_id"]}`; // - перезаписали id в свойстве нашего объекта в index
-      document.forms[
-        `${objSettingForDeleteCard.keyformTypeQuestionDelete}`
-      ].addEventListener(
-        "submit",
-        objSettingForDeleteCard.keyHandleSubmitPopupQuestionDeleteCard
-      ); // при клике на кнопку удаления вещаем слушатель Сабмит на форму
+      objSettingForDeleteCard.keyElementCard = evt.target.closest(".card"); // записали элемент в свойство объекта
     });
   }
   // проверка наличия моего лайка при создании карточки
-  if (
-    data["likes"].find((element) => {
-      return element._id.includes(`9d69c59e21fa2ffa88579137`);
-    }) !== undefined
-  ) {
-    cardLikeButton.classList.add("card__like-button_is-active");
-  } else {
-    cardLikeButton.classList.remove("card__like-button_is-active");
-  }
-  
-  cardTemplateItemCopy
-    .querySelector(`${objSettingForLikeCard.keylikeCounter}`)
-    .setAttribute("style", "display: block; text-align: center;");
-  cardTemplateItemCopy.querySelector(
-    `${objSettingForLikeCard.keylikeCounter}`
-  ).textContent = `${data.likes.length}`;
+  checkMyLikeInCard(data, myId, cardLikeButton);
+
+  likeCounter.textContent = `${data.likes.length}`;
   cardImage.src = data.link;
   cardImage.alt = data.name;
   cardTitle.textContent = data.name;
 
-  cardLikeButton.addEventListener(
-    "click",
-    objSettingForLikeCard.keyHandleLikeCard
-  );
-  cardImage.addEventListener("click", openPopupCardImg);
+  cardLikeButton.addEventListener("click", (evt) => {
+    objSettingForLikeCard.keyHandleLikeCard(evt, data, likeCounter);
+  });
+  cardImage.addEventListener("click", () => openPopupCardImg(data));
   return cardTemplateItemCopy;
 }
 
