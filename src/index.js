@@ -1,5 +1,5 @@
 import "./pages/index.css";
-import { creatCard, likeCard, deleteCardElement } from "./components/card";
+import { creatCard, likeCard, deleteCardElement, checkLikeCard } from "./components/card";
 import { closePopup, openPopup, clickOverlay } from "./components/modal";
 import { enableValidation, clearValidation } from "./components/validation";
 import {
@@ -26,6 +26,7 @@ const popupTypeEdit = document.querySelector(".popup_type_edit");
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
 const popupTypeImage = document.querySelector(".popup_type_image");
 const popupTypeNewAvatar = document.querySelector(".popup_type_new-avatar");
+const popupDeleteQuestion = document.querySelector(".popup_type_delete-card");
 
 const formTypeEditProfile = document.forms["edit-profile"];
 const formTypeNewCard = document.forms["new-place"];
@@ -56,35 +57,16 @@ const validationSetting = {
   keyDeleteBtn: "[type=submit]",
 };
 
-const objSettingForLikeCard = {
-  keyHandleLikeCard: handleLikeCard,
-};
-
 const objSettingForDeleteCard = {
-  keyPopupTypeDeleteCard: `.popup_type_delete-card`,
-  openDeleteCardOk: () => {
-    const popupDeleteQuestion = document.querySelector(
-      `${objSettingForDeleteCard.keyPopupTypeDeleteCard}`
-    );
-    openPopup(popupDeleteQuestion);
-  },
   idCard: "",
   keyElementCard: "",
-  popupTypeDeleteCard: "",
-  keyHandleSubmitPopupQuestionDeleteCard: handleSubmitPopupQuestionDeleteCard,
 };
 
-// =======================================Функция проверки наличия лайка=======================================
-function checkMyLikeInCard(data, myId, cardLikeButton) {
-  if (
-    data["likes"].find((element) => {
-      return element._id.includes(myId);
-    }) !== undefined
-  ) {
-    cardLikeButton.classList.add("card__like-button_is-active");
-  } else {
-    cardLikeButton.classList.remove("card__like-button_is-active");
-  }
+// =======================================Функция открыть окно подтверждения=======================================
+function openDeleteCardOk(id, element) {
+  objSettingForDeleteCard.idCard = id;
+  objSettingForDeleteCard.keyElementCard = element;
+  openPopup(popupDeleteQuestion);
 }
 
 // =======================================Функции изменения текста во время загрузки=======================================
@@ -109,21 +91,19 @@ function openPopupCardImg(data) {
 
 // обработка поставить лайк
 function handleLikeCard(evt, dataCard, likeCounter) {
-  const btnLike = evt.target;
-
-  if (!btnLike.classList.contains("card__like-button_is-active")) {
+  if (!checkLikeCard(evt.target)) {
     setLikeCard(dataCard._id)
       .then((res) => {
-        likeCard(btnLike);
+        likeCard(evt.target);
         likeCounter.textContent = res.likes.length;
       })
       .catch((err) => {
         console.log(err); // выводим ошибку в консоль
       });
-  } else if (btnLike.classList.contains("card__like-button_is-active")) {
+  } else {
     deleteCard(`likes/${dataCard._id}`)
       .then((res) => {
-        likeCard(btnLike);
+        likeCard(evt.target);
         likeCounter.textContent = res.likes.length;
       })
       .catch((err) => {
@@ -150,8 +130,10 @@ function editProfileFormSubmit(evt) {
       closePopup(popupTypeEdit);
     })
     .catch((err) => {
-      deleteTextLoadingBtnDel(evt.target);
       console.log(err); // выводим ошибку в консоль
+    })
+    .finally(function () {
+      deleteTextLoadingBtnDel(evt.target);
     });
 }
 
@@ -161,18 +143,13 @@ function addNewCardFormSubmit(evt) {
   setTextLoadingBtnDel(evt.target);
   setNewCardServ(inputPlaceNameTypeNewCard.value, inputlinkTypeNewCard.value)
     .then((res) => {
-      return res.json();
-    })
-    .then((res) => {
       placesList.prepend(
         creatCard(
           res,
           openPopupCardImg,
-          objSettingForDeleteCard,
-          objSettingForLikeCard,
+          handleLikeCard,
           res[`owner`][`_id`],
-          objSettingForDeleteCard.openDeleteCardOk,
-          checkMyLikeInCard
+          openDeleteCardOk
         )
       );
       closePopup(popupTypeNewCard);
@@ -180,22 +157,20 @@ function addNewCardFormSubmit(evt) {
       inputlinkTypeNewCard.value = "";
     })
     .catch((err) => {
-      deleteTextLoadingBtnDel(evt.target);
       console.log(err); // выводим ошибку в консоль
+    })
+    .finally(function () {
+      deleteTextLoadingBtnDel(evt.target);
     });
 }
 
 // обработка submit удаления карточки
-function handleSubmitPopupQuestionDeleteCard(evt) {
+function handleSubmitPopupQuestionDeleteCard(evt, id, element) {
   evt.preventDefault();
-  deleteCard(objSettingForDeleteCard.idCard)
+  deleteCard(id)
     .then(() => {
-      deleteCardElement(objSettingForDeleteCard.keyElementCard);
-      closePopup(
-        document.querySelector(
-          `${objSettingForDeleteCard.keyPopupTypeDeleteCard}`
-        )
-      );
+      deleteCardElement(element);
+      closePopup(popupDeleteQuestion);
     })
     .catch((err) => {
       console.log(err); // выводим ошибку в консоль
@@ -221,8 +196,10 @@ function handleSubmitPopupNewAvatar(evt) {
       closePopup(popupTypeNewAvatar);
     })
     .catch((err) => {
-      deleteTextLoadingBtnDel(evt.target);
       console.log(err); // выводим ошибку в консоль
+    })
+    .finally(function () {
+      deleteTextLoadingBtnDel(evt.target);
     });
 }
 
@@ -236,18 +213,13 @@ profileImage.addEventListener("click", function () {
   formTypeNewAvatar.querySelector(
     `${validationSetting.keyPopapInput}`
   ).value = ``;
-  deleteTextLoadingBtnDel(formTypeNewAvatar);
   clearValidation(formTypeNewAvatar, validationSetting);
-  popupTypeNewAvatar
-    .querySelector(".popup__content")
-    .setAttribute("style", "min-height: 0px;");
   formTypeNewAvatar.addEventListener("submit", handleSubmitPopupNewAvatar);
   openPopup(popupTypeNewAvatar);
 });
 
 // клик по кнопке редактировать профиль
 profileEditButton.addEventListener("click", function (evt) {
-  deleteTextLoadingBtnDel(formTypeEditProfile);
   openPopup(popupTypeEdit);
   inputNamePopupTypeEdit.value = profileTitle.textContent;
   inputDescriptionPopupTypeEdit.value = profileDescription.textContent;
@@ -256,7 +228,6 @@ profileEditButton.addEventListener("click", function (evt) {
 
 // клик по кнопке добавить карточку
 profileAddButton.addEventListener("click", function (evt) {
-  deleteTextLoadingBtnDel(formTypeNewCard);
   openPopup(popupTypeNewCard);
   clearValidation(formTypeNewCard, validationSetting);
 });
@@ -265,10 +236,13 @@ profileAddButton.addEventListener("click", function (evt) {
 // слушатели submit для форм редактирования профиля
 formTypeEditProfile.addEventListener("submit", editProfileFormSubmit);
 formTypeNewCard.addEventListener("submit", addNewCardFormSubmit);
-formTypeQuestionDelete.addEventListener(
-  "submit",
-  objSettingForDeleteCard.keyHandleSubmitPopupQuestionDeleteCard
-);
+formTypeQuestionDelete.addEventListener("submit", function (evt) {
+  handleSubmitPopupQuestionDeleteCard(
+    evt,
+    objSettingForDeleteCard.idCard,
+    objSettingForDeleteCard.keyElementCard
+  );
+});
 
 // =======================================Вызовы при старте страницы=======================================
 // +класс при старте, +слушатель на кнопку крестик, +слушатель на оверлей popup
@@ -297,11 +271,9 @@ Promise.all([getCardsFromServ(), getDataProfileFromServ()])
         creatCard(
           item,
           openPopupCardImg,
-          objSettingForDeleteCard,
-          objSettingForLikeCard,
+          handleLikeCard,
           res[1][`_id`],
-          objSettingForDeleteCard.openDeleteCardOk,
-          checkMyLikeInCard
+          openDeleteCardOk
         )
       );
     });

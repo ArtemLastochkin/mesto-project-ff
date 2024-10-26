@@ -69,7 +69,7 @@ export function setNewCardServ(dataName, dataLink) {
       name: dataName,
       link: dataLink,
     }),
-  });
+  }).then((res) => getResponseData(res));
 }
 
 // ==================================== Запросы PUT на СЕРВЕР ================================ \\

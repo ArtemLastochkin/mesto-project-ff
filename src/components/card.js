@@ -2,11 +2,9 @@
 export function creatCard(
   data,
   openPopupCardImg,
-  objSettingForDeleteCard,
-  objSettingForLikeCard,
+  handleLikeCard,
   myId,
   openDeleteCardOk,
-  checkMyLikeInCard
 ) {
   const cardTemplate = document.querySelector("#card-template").content;
   const cardTemplateItem = cardTemplate.querySelector(".places__item");
@@ -30,13 +28,12 @@ export function creatCard(
     cardDeleteButton.classList.add("card__delete-button_is-active"); // скрыли кнопку удаления
     // если карточка моя вещаем на кнопку удаления слушатель клика
     cardDeleteButton.addEventListener("click", (evt) => {
-      openDeleteCardOk(); // - функция которая открывает модалку при клике на кнопку удаления
-      objSettingForDeleteCard.idCard = `${data["_id"]}`; // - перезаписали id в свойстве нашего объекта в index
-      objSettingForDeleteCard.keyElementCard = evt.target.closest(".card"); // записали элемент в свойство объекта
+      openDeleteCardOk(`${data["_id"]}`, evt.target.closest(".card")); // - функция которая открывает модалку при клике на кнопку удаления
     });
   }
   // проверка наличия моего лайка при создании карточки
-  checkMyLikeInCard(data, myId, cardLikeButton);
+  const booleanMyIdInArrayLikes = Boolean(data["likes"].find(element => element._id.includes(myId)))
+  cardLikeButton.classList.toggle("card__like-button_is-active", booleanMyIdInArrayLikes);
 
   likeCounter.textContent = `${data.likes.length}`;
   cardImage.src = data.link;
@@ -44,7 +41,7 @@ export function creatCard(
   cardTitle.textContent = data.name;
 
   cardLikeButton.addEventListener("click", (evt) => {
-    objSettingForLikeCard.keyHandleLikeCard(evt, data, likeCounter);
+    handleLikeCard(evt, data, likeCounter);
   });
   cardImage.addEventListener("click", () => openPopupCardImg(data));
   return cardTemplateItemCopy;
@@ -52,6 +49,10 @@ export function creatCard(
 
 export function deleteCardElement(element) {
   element.remove();
+}
+
+export function checkLikeCard(buttonLike) {
+ return buttonLike.classList.contains("card__like-button_is-active")
 }
 
 export function likeCard(element) {
